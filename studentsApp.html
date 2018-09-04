@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+ <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+    <div ng-app="myApp" ng-controller="formCtrl"> 
+        <div class="tab" ng-init="tabSelected = 1">
+          <button class="tablinks"  ng-click="tabSelected = 1">new student</button>
+          <button class="tablinks"  ng-click="tabSelected = 2">all students</button>
+        </div>
+        <newstudent ng-show="tabSelected==1" class="tabcontent"></newstudent>
+        <allstudents ng-show="tabSelected==2" class="tabcontent"></allstudents>
+     </div>    
+</body>
+    
+<script>
+var app = angular.module('myApp', []);    
+
+app.controller('formCtrl', function($scope) {       
+ $scope.students=[]; 
+
+ //default order&sort
+$scope.orderByField = 'firstName';
+$scope.reverseSort = false;   
+
+//create new student
+$scope.addSudent = function () {   
+   
+    var person = {
+        firstName:$scope.firstName,
+        lastName:$scope.lastName,
+        mail:$scope.mail       
+     };
+    
+     $scope.students.push(person); 
+     $scope.reset();
+  } 
+  
+});
+    
+//directive to create new students 
+app.directive('newstudent', function() {
+var directive = {};
+directive.restrict = 'E';
+directive.scope= false,  // to use the parent scope
+directive.template = `<H1> New Student </H1>
+                    <form>     
+                            <label  for="fname">First Name</label>
+                            <input type="text" ng-model="firstName" id="fname" >
+                            <label for="lname">Last Name</label>
+                            <input  type="text" ng-model="lastName" id="fname" >
+                            <label for="mail">Email</label>
+                            <input  type="text"  ng-model="mail" id="mail">                  
+                            <input type="submit" value="Submit" ng-click="addSudent()">
+                    </form>`;
+
+
+directive.compile = function(element, attributes) {
+var linkFunction = function($scope, element, attributes) {    
+    $scope.addSudent = function () {   
+    var person = {
+        firstName:$scope.firstName,
+        lastName:$scope.lastName,
+        mail:$scope.mail       
+     };
+    
+     $scope.students.push(person); 
+     $scope.reset();
+  }     
+  //clean all fields
+  $scope.reset = function() {
+            $scope.firstName ='';
+            $scope.lastName ='';
+            $scope.mail ='';
+   };
+}
+return linkFunction;
+}
+return directive;
+});
+    
+ //directive to show all students       
+app.directive('allstudents', function() {
+
+var directive = {};
+directive.restrict = 'E';
+directive.scope= false, // to use the parent scope
+directive.template = `<H1> All Students </H1>
+                        <div class="search">
+                         <input type="text" ng-model="search" 
+                                placeholder="Enter some text to search" /><br>        
+                        </div>
+                         <table>   
+                            <tr>
+                                <th> 
+                                     <a href="#" ng-click="orderByField='firstName'; reverseSort = !reverseSort">
+                                      First Name <span ng-show="orderByField == 'firstName'" ></span>
+                                      </a>
+                                </th>               
+                                <th>
+                                    <a href="#" ng-click="orderByField='lastName'; reverseSort = !reverseSort">
+                                      Last Name <span ng-show="orderByField == 'lastName'"></span>
+                                    </a>                
+                                </th>
+                                <th>
+                                    <a href="#" ng-click="orderByField='mail'; reverseSort = !reverseSort">
+                                      Email <span ng-show="orderByField == 'mail'"></span>
+                                    </a>                
+                                </th>              
+                            </tr>
+                              <tr ng-repeat="x in students| orderBy:orderByField:reverseSort | filter : search" > 
+                                <td>{{x.firstName}}</td>
+                                <td>{{x.lastName}}</td>
+                                <td>{{x.mail}}</td>
+                              </tr>
+                        </table>`;
+
+
+directive.compile = function(element, attributes) {
+var linkFunction = function($scope, element, attributes) {}
+return linkFunction;
+}
+return directive;
+});    
+
+</script>
+
+</html>
+
+
